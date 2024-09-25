@@ -53,7 +53,7 @@ contract EquitEdge is  ERC20Capped, Ownable, ReentrancyGuard {
         ERC20Capped(500_000_000 * (10 ** 18)) // Token supply cap
         Ownable(msg.sender)
     {
-        require(_initialAddresses.length == 2, "Must provide exactly 2 addresses for initial minting");
+        require(_initialAddresses.length == 5, "Must provide exactly 5 addresses for initial minting");
         require(_requiredApprovals <= _approvers.length, "Invalid number of required approvals");
 
         // Mint 40 million tokens to each of the provided 5 addresses
