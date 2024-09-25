@@ -48,7 +48,8 @@ $ anvil
 ### Deploy
 
 ```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
+$ forge script script/EquitEdge.s.sol:EquitEdgeScript --legacy  --rpc-url https://erpc.xinfin.network --private-key <> --broadcast
+
 ```
 
 ### Cast
