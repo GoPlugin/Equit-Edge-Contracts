@@ -28,7 +28,9 @@ contract EquitEdgeScript is Script {
         equitEdge = new EquitEdge(
             initialAddresses,
             approvers,
-            requiredApprovals
+            requiredApprovals,
+            "Equit Edge Token",
+            "EEG"
         );
 
         vm.stopBroadcast();

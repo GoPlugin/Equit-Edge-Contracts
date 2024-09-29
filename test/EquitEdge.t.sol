@@ -23,7 +23,9 @@ contract EquitEdgeTest is Test {
         equitEdge = new EquitEdge(
             initialAddresses,
             approvers,
-            requiredApprovals
+            requiredApprovals,
+            "EEG Token",
+            "EEG"
         );
     }
 

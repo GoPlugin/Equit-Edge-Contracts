@@ -8,6 +8,8 @@ import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 contract EquitEdge is  ERC20Capped, Ownable, ReentrancyGuard {
     // 40 million tokens per address during initial minting
     uint256 public constant INITIAL_MINT_PER_ADDRESS = 40_000_000 * (10 ** 18); 
+    uint256 public constant TOTAL_SUPPLY_EEG = 500_000_000 * (10 ** 18); 
+
 
     //Pause Minting flag
     bool public mintingPaused;
@@ -16,7 +18,7 @@ contract EquitEdge is  ERC20Capped, Ownable, ReentrancyGuard {
     address[] public approvers;
 
     // Total Approvals required
-    uint256 public requiredApprovals;
+    uint256 public immutable requiredApprovals;
 
     // To Track the approver
     mapping(address => bool) public isApprover;
@@ -41,23 +43,29 @@ contract EquitEdge is  ERC20Capped, Ownable, ReentrancyGuard {
     event MintRequested(uint256 indexed requestId, address indexed to, uint256 amount);
     event MintApproved(uint256 indexed requestId, address indexed approver);
     event MintExecuted(uint256 indexed requestId, address indexed to, uint256 amount);
+    event PauseOrUnpause(address indexed actionTakenBy,string action, uint256 takenOn);
+    event OwnerShipRenounced(address indexed actionTakenBy,uint256 takenOn);
+
 
     // Constructor function which override the cap information to 500 million
     // Ownable by contract deployer
     constructor(
         address[] memory _initialAddresses,
         address[] memory _approvers,
-        uint256 _requiredApprovals
+        uint256 _requiredApprovals,
+        string memory _tokenName,
+        string memory _tokenSymbol
     )
-        ERC20("Platform Token", "YYEG") // Token name and symbol
-        ERC20Capped(500_000_000 * (10 ** 18)) // Token supply cap
+        ERC20(_tokenName,_tokenSymbol) // Token name and symbol
+        ERC20Capped(TOTAL_SUPPLY_EEG) // Token supply cap
         Ownable(msg.sender)
     {
         require(_initialAddresses.length == 5, "Must provide exactly 5 addresses for initial minting");
-        require(_requiredApprovals <= _approvers.length, "Invalid number of required approvals");
+        require(_requiredApprovals == _approvers.length, "Invalid number of required approvals");
 
         // Mint 40 million tokens to each of the provided 5 addresses
         for (uint256 i = 0; i < _initialAddresses.length; i++) {
+            require(_initialAddresses[i] != address(0),"Zero address found");
             _mint(_initialAddresses[i], INITIAL_MINT_PER_ADDRESS);
         }
 
@@ -65,6 +73,7 @@ contract EquitEdge is  ERC20Capped, Ownable, ReentrancyGuard {
         requiredApprovals = _requiredApprovals;
 
         for (uint256 i = 0; i < _approvers.length; i++) {
+            require(!isApprover[_approvers[i]], "Duplicate approver address found");
             isApprover[_approvers[i]] = true;
         }
     }
@@ -124,11 +133,20 @@ contract EquitEdge is  ERC20Capped, Ownable, ReentrancyGuard {
     //Pause Minting
     function pauseMinting() external onlyOwner {
         mintingPaused = true;
+        emit PauseOrUnpause(msg.sender,"pause",block.timestamp);
     }
 
     //Un Pause Minting
     function unpauseMinting() external onlyOwner {
         mintingPaused = false;
+        emit PauseOrUnpause(msg.sender,"unpause",block.timestamp);
+    }
+
+    //To renounce the ownership
+    //Should be called only by the owner
+    function renounceContractOwnership() public onlyOwner {
+        emit OwnerShipRenounced(msg.sender,block.timestamp);
+        renounceOwnership();
     }
 
 }
