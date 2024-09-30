@@ -10,7 +10,6 @@ contract EquitEdge is  ERC20Capped, Ownable, ReentrancyGuard {
     uint256 public constant INITIAL_MINT_PER_ADDRESS = 40_000_000 * (10 ** 18); 
     uint256 public constant TOTAL_SUPPLY_EEG = 500_000_000 * (10 ** 18); 
 
-
     //Pause Minting flag
     bool public mintingPaused;
 
@@ -18,7 +17,7 @@ contract EquitEdge is  ERC20Capped, Ownable, ReentrancyGuard {
     address[] public approvers;
 
     // Total Approvals required
-    uint256 public immutable requiredApprovals;
+    uint256 public immutable requiredApprovers = 3;
 
     // To Track the approver
     mapping(address => bool) public isApprover;
@@ -52,7 +51,6 @@ contract EquitEdge is  ERC20Capped, Ownable, ReentrancyGuard {
     constructor(
         address[] memory _initialAddresses,
         address[] memory _approvers,
-        uint256 _requiredApprovals,
         string memory _tokenName,
         string memory _tokenSymbol
     )
@@ -61,20 +59,19 @@ contract EquitEdge is  ERC20Capped, Ownable, ReentrancyGuard {
         Ownable(msg.sender)
     {
         require(_initialAddresses.length == 5, "Must provide exactly 5 addresses for initial minting");
-        require(_requiredApprovals == _approvers.length, "Invalid number of required approvals");
+        require(_approvers.length == 5, "Shoul have 5 approvers");
+
+        approvers = _approvers;
+
+        for (uint256 i = 0; i < _approvers.length; i++) {
+            require(_approvers[i] != address(0),"Zero address found");
+            require(!isApprover[_approvers[i]], "Duplicate approver address found");
+            isApprover[_approvers[i]] = true;
+        }
 
         // Mint 40 million tokens to each of the provided 5 addresses
         for (uint256 i = 0; i < _initialAddresses.length; i++) {
-            require(_initialAddresses[i] != address(0),"Zero address found");
             _mint(_initialAddresses[i], INITIAL_MINT_PER_ADDRESS);
-        }
-
-        approvers = _approvers;
-        requiredApprovals = _requiredApprovals;
-
-        for (uint256 i = 0; i < _approvers.length; i++) {
-            require(!isApprover[_approvers[i]], "Duplicate approver address found");
-            isApprover[_approvers[i]] = true;
         }
     }
 
@@ -122,11 +119,10 @@ contract EquitEdge is  ERC20Capped, Ownable, ReentrancyGuard {
 
         emit MintApproved(_requestId, msg.sender);
 
-        if (mintRequests[_requestId].approvalsCount >= requiredApprovals) {
+        if (mintRequests[_requestId].approvalsCount >= requiredApprovers) {
+            mintRequests[_requestId].isProcessed = true;
             _mint(mintRequests[_requestId].to, mintRequests[_requestId].amount);
             emit MintExecuted(_requestId, mintRequests[_requestId].to, mintRequests[_requestId].amount);
-            // Clear request after minting
-            mintRequests[_requestId].isProcessed = true;
         }
     }
 
@@ -144,7 +140,7 @@ contract EquitEdge is  ERC20Capped, Ownable, ReentrancyGuard {
 
     //To renounce the ownership
     //Should be called only by the owner
-    function renounceContractOwnership() public onlyOwner {
+    function renounceOwnership() public override onlyOwner {
         emit OwnerShipRenounced(msg.sender,block.timestamp);
         renounceOwnership();
     }
