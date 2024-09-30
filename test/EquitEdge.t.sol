@@ -19,14 +19,11 @@ contract EquitEdgeTest is Test {
 
 
         // Define the approvers array as a dynamic array
-        address[] memory approvers = new address[](5);
+        address[] memory approvers = new address[](3);
         //From a/c 4 to 8
         approvers[0] = 0x8c52c1b313530D457206C0DB104DF61B1213fe97;
         approvers[1] = 0x0ee64CBb3Dc7eacb782F12a6f667C450268CF3D0;
         approvers[2] = 0x317705CF5007996D561cbA50E1c3B07e5d5e4083;
-        approvers[3] = 0xfd6088e52894b2Bd4ED3AF2f97188181d2da5398;
-        approvers[4] = 0xE611882694798a5a92BF2f23a0a1a7B56F243a31;
-
 
         equitEdge = new EquitEdge(
             initialAddresses,
@@ -47,12 +44,10 @@ contract EquitEdgeTest is Test {
 
 
         // Define the approvers array as a dynamic array
-        address[] memory approvers = new address[](5);
+        address[] memory approvers = new address[](3);
         approvers[0] = 0x8c52c1b313530D457206C0DB104DF61B1213fe97;
         approvers[1] = 0x0ee64CBb3Dc7eacb782F12a6f667C450268CF3D0;
         approvers[2] = 0x317705CF5007996D561cbA50E1c3B07e5d5e4083;
-        approvers[3] = 0xfd6088e52894b2Bd4ED3AF2f97188181d2da5398;
-        approvers[4] = 0xE611882694798a5a92BF2f23a0a1a7B56F243a31;
 
 
         // Check that the initial balances are correct
@@ -95,9 +90,9 @@ contract EquitEdgeTest is Test {
         vm.prank(0x0ee64CBb3Dc7eacb782F12a6f667C450268CF3D0); // Change msg.sender to the second approver
         equitEdge.approveMint(requestId);
 
-        // Simulate the second approver approving the mint request
-        vm.prank(0x317705CF5007996D561cbA50E1c3B07e5d5e4083); // Change msg.sender to the second approver
-        equitEdge.approveMint(requestId);
+        // // Simulate the second approver approving the mint request
+        // vm.prank(0x317705CF5007996D561cbA50E1c3B07e5d5e4083); // Change msg.sender to the second approver
+        // equitEdge.approveMint(requestId);
          
         // Check that the mint was executed
         uint256 newBalance = equitEdge.balanceOf(address(this));

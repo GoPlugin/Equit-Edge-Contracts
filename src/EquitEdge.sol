@@ -17,7 +17,7 @@ contract EquitEdge is  ERC20Capped, Ownable, ReentrancyGuard {
     address[] public approvers;
 
     // Total Approvals required
-    uint256 public immutable requiredApprovers = 3;
+    uint256 public immutable minRequiredApprovers = 2;
 
     // To Track the approver
     mapping(address => bool) public isApprover;
@@ -59,7 +59,7 @@ contract EquitEdge is  ERC20Capped, Ownable, ReentrancyGuard {
         Ownable(msg.sender)
     {
         require(_initialAddresses.length == 5, "Must provide exactly 5 addresses for initial minting");
-        require(_approvers.length == 5, "Shoul have 5 approvers");
+        require(_approvers.length == 3, "Shoul have 3 approvers");
 
         approvers = _approvers;
 
@@ -119,7 +119,7 @@ contract EquitEdge is  ERC20Capped, Ownable, ReentrancyGuard {
 
         emit MintApproved(_requestId, msg.sender);
 
-        if (mintRequests[_requestId].approvalsCount >= requiredApprovers) {
+        if (mintRequests[_requestId].approvalsCount >= minRequiredApprovers) {
             mintRequests[_requestId].isProcessed = true;
             _mint(mintRequests[_requestId].to, mintRequests[_requestId].amount);
             emit MintExecuted(_requestId, mintRequests[_requestId].to, mintRequests[_requestId].amount);
