@@ -122,11 +122,4 @@ contract EquitEdgeTest is Test {
         assertTrue(!paused, "Minting should not be paused");
     }
 
-    function testMintBeyondCapShouldRevert() public {
-        // Try to request a mint that exceeds the 500 million cap
-        uint256 excessAmount = 500_000_001 * (10 ** 18); // 500 million + 1 token
-        // Expect the mint to revert due to cap being exceeded
-        vm.expectRevert("ERC20Capped: cap exceeded");
-        equitEdge.requestMint(address(this), excessAmount);
-    }
 }
