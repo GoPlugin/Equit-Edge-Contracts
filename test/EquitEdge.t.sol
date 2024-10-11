@@ -18,16 +18,8 @@ contract EquitEdgeTest is Test {
         initialAddresses[4] = 0xb5c88dcc8Da552fd1c15d852b696a94367a3096c;
 
 
-        // Define the approvers array as a dynamic array
-        address[] memory approvers = new address[](3);
-        //From a/c 4 to 8
-        approvers[0] = 0x8c52c1b313530D457206C0DB104DF61B1213fe97;
-        approvers[1] = 0x0ee64CBb3Dc7eacb782F12a6f667C450268CF3D0;
-        approvers[2] = 0x317705CF5007996D561cbA50E1c3B07e5d5e4083;
-
         equitEdge = new EquitEdge(
             initialAddresses,
-            approvers,
             "EEG Token",
             "EEG"
         );
@@ -56,70 +48,44 @@ contract EquitEdgeTest is Test {
 
         assertEq(
             balance1,
-            40_000_000 * 10 ** 18,
-            "Initial balance for address 1 should be 40 million"
+            100_000_000 * 10 ** 18,
+            "Initial balance for address 1 should be 100 million"
         );
         assertEq(
             balance2,
-            40_000_000 * 10 ** 18,
-            "Initial balance for address 2 should be 40 million"
+            100_000_000 * 10 ** 18,
+            "Initial balance for address 2 should be 100 million"
         );
     }
 
-    function testMintRequest() public {
-        // Request a minting operation
-        uint256 requestId = equitEdge.requestMint(
-            address(this),
-            1_000_000 * 10 ** 18
-        );
-        assertEq(requestId, 1, "First request ID should be 1");
+ // Test to ensure that the total supply after deployment matches 500 million
+    function testInitialSupplyIsCapped() public view {
+        // Check total supply is 500 million tokens
+        uint256 totalSupply = equitEdge.totalSupply();
+        uint256 expectedSupply = 500_000_000 * (10 ** 18);
+        
+        assertEq(totalSupply, expectedSupply, "Total supply does not match cap.");
     }
 
-    function testApproveMinting() public {
-        // Request a minting operation
-        uint256 requestId = equitEdge.requestMint(
-            address(this),
-            1_000_000 * 10 ** 18
-        );
+    // Test to ensure no more tokens can be minted beyond the cap
+    // function testMintBeyondCapShouldFail() public {
+    //     // Try to mint new tokens, which should fail since the cap is reached
+    //     vm.expectRevert("ERC20Capped: cap exceeded");
+    //     equitEdge.mint(address(this), 1 * (10 ** 18)); // Attempt to mint 1 token
+    // }
 
-        // Simulate the first approver approving the mint request
-        vm.prank(0x8c52c1b313530D457206C0DB104DF61B1213fe97); // Change msg.sender to the first approver
-        equitEdge.approveMint(requestId);
+    // Test that the owner cannot mint beyond cap
+    // function testOwnerCannotMintBeyondCap() public {
+    //     // Try minting more tokens and expect failure
+    //     vm.expectRevert("ERC20Capped: cap exceeded");
+    //     equitEdge.mint(address(0x6), 1 * (10 ** 18)); // Owner trying to mint additional tokens
+    // }
 
-        // Simulate the second approver approving the mint request
-        vm.prank(0x0ee64CBb3Dc7eacb782F12a6f667C450268CF3D0); // Change msg.sender to the second approver
-        equitEdge.approveMint(requestId);
-
-        // // Simulate the second approver approving the mint request
-        // vm.prank(0x317705CF5007996D561cbA50E1c3B07e5d5e4083); // Change msg.sender to the second approver
-        // equitEdge.approveMint(requestId);
-         
-        // Check that the mint was executed
-        uint256 newBalance = equitEdge.balanceOf(address(this));
-        assertEq(
-            newBalance,
-            1_000_000 * 10 ** 18,
-            "Minting was not executed correctly"
-        );
-    }
-
-    function testPauseMinting() public {
-        // Pause minting
-        equitEdge.pauseMinting();
-
-        // Verify that minting is paused
-        bool paused = equitEdge.mintingPaused();
-        assertTrue(paused, "Minting should be paused");
-    }
-
-    function testUnpauseMinting() public {
-        // Pause and then unpause minting
-        equitEdge.pauseMinting();
-        equitEdge.unpauseMinting();
-
-        // Verify that minting is not paused
-        bool paused = equitEdge.mintingPaused();
-        assertTrue(!paused, "Minting should not be paused");
-    }
-
+    // Test renouncing ownership works correctly
+    // function testOwnerCanRenounceOwnership() public {
+    //     // Renounce ownership
+    //     equitEdge.renounceOwnership();
+    //     // Check if the owner is the zero address
+    //     assertEq(equitEdge.owner(), address(0), "Ownership was not renounced correctly.");
+    // }
 }
